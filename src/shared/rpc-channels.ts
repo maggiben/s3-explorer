@@ -1,0 +1,30 @@
+export const IpcChannels = {
+  APP_READY: 'APP_READY',
+  APP_MAIN_MENU_CLICK: 'APP_MAIN_MENU_CLICK',
+  APP_CONTEXT_MENU_CLICK: 'APP_CONTEXT_MENU_CLICK',
+  APP_CLOSE_MODAL: 'APP_CLOSE_MODAL',
+  APP_MODAL_RESIZE: 'APP_MODAL_RESIZE',
+  APP_SYNC_PREFERENCES: 'APP_SYNC_PREFERENCES',
+};
+
+/* TODO: Duplicated from main because cannot reexport */
+export const SchedulerChannels = {
+  STOP: 'STOP',
+  RETRY: 'RETRY',
+  FINISHED: 'FINISHED',
+  PLAYLISTI_ITEMS: 'PLAYLISTI_ITEMS',
+  WORKER_ERROR: 'WORKER_ERROR',
+  WORKER_ONLINE: 'WORKER_ONLINE',
+  WORKER_EXIT: 'WORKER_EXIT',
+};
+
+/* TODO: Duplicated from main because cannot reexport */
+export const DownloadWorkerChannels = {
+  END: 'END',
+  TIMEOUT: 'TIMEOUT',
+  PROGRESS: 'PROGRESS',
+  INFO: 'INFO',
+  VIDEO_INFO: 'VIDEO_INFO',
+  ENCODING_ERROR: 'ENCODING_ERROR',
+  CONTENT_LENGTH: 'CONTENT_LENGTH',
+};

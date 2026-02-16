@@ -1,15 +1,16 @@
-import { useState } from 'react'
+import { useState } from 'react';
+import { Flex, Tag } from 'antd';
 
 function Versions(): React.JSX.Element {
-  const [versions] = useState(window.electron.process.versions)
+  const [versions] = useState(window.electron.process.versions);
 
   return (
-    <ul className="versions">
-      <li className="electron-version">Electron v{versions.electron}</li>
-      <li className="chrome-version">Chromium v{versions.chrome}</li>
-      <li className="node-version">Node v{versions.node}</li>
-    </ul>
-  )
+    <Flex gap="small" align="center" wrap>
+      <Tag>Electron v{versions.electron}</Tag>
+      <Tag>Chromium v{versions.chrome}</Tag>
+      <Tag>Node v{versions.node}</Tag>
+    </Flex>
+  );
 }
 
-export default Versions
+export default Versions;
