@@ -23,13 +23,16 @@
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
     "@aws-sdk/client-s3": "^3.990.0",
+    "@aws-sdk/lib-storage": "^3.990.0",
+    "@aws-sdk/s3-request-presigner": "^3.990.0",
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "antd": "^6.3.0",
     "electron-updater": "^6.3.9",
     "i18next": "^25.8.8",
     "jotai": "^2.17.1",
-    "react-i18next": "^16.5.4"
+    "react-i18next": "^16.5.4",
+    "sequelize": "^6.37.7"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",

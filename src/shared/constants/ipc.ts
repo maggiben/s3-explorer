@@ -1,0 +1,10 @@
+export default {
+  MAIN_API: 'MAIN-API',
+  CONFIG: {
+    GET_CONFIG: 'GET-CONFIG',
+  },
+  DIALOG: {
+    SHOW_ERROR_BOX: 'SHOW-ERROR-BOX',
+    SHOW_OPEN_DIALOG: 'SHOW-OPEN-DIALOG',
+  },
+};

@@ -1,7 +1,7 @@
 import React from 'react';
 import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import { Breadcrumb, Layout, Menu, theme, Avatar, Space } from 'antd';
 
 const { Header, Content, Sider } = Layout;
 
@@ -34,28 +34,38 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [collapsed, setCollapsed] = React.useState(true);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
   return (
     <Layout style={{ minHeight: '100vh', minWidth: '100vw' }}>
-      <Header style={{ display: 'flex', alignItems: 'center' }}>
-        <div className="demo-logo" />
-        <Menu
-          theme="dark"
-          mode="horizontal"
-          defaultSelectedKeys={['2']}
-          items={items1}
-          style={{ flex: 1, minWidth: 0 }}
-        />
+      <Header style={{ padding: '0 10px' }}>
+        <Space>
+          <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#87d068' }}></Avatar>
+          <Menu
+            theme="dark"
+            mode="horizontal"
+            defaultSelectedKeys={['2']}
+            items={items1}
+            style={{ flex: 1, minWidth: 0 }}
+          />
+        </Space>
       </Header>
       <Layout>
-        <Sider width={200} style={{ background: colorBgContainer }}>
+        <Sider
+          width={200}
+          theme="light"
+          style={{ background: colorBgContainer }}
+          collapsible
+          collapsed={collapsed}
+          onCollapse={(value) => setCollapsed(value)}
+        >
           <Menu
             mode="inline"
             defaultSelectedKeys={['1']}
-            defaultOpenKeys={['sub1']}
+            defaultOpenKeys={[]}
             style={{ height: '100%', borderInlineEnd: 0 }}
             items={items2}
           />

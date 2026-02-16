@@ -55,7 +55,11 @@ app.whenReady().then(() => {
   });
 
   // IPC test
-  ipcMain.on('ping', () => console.log('pong'));
+  ipcMain.on('ping', () => {
+    const focusedWindow = BrowserWindow.getFocusedWindow();
+    focusedWindow?.webContents.send('main-process-message', { pong: new Date().getTime() });
+    console.log('pong');
+  });
 
   createWindow();
 
