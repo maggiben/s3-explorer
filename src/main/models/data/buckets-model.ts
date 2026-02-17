@@ -19,7 +19,7 @@ class Buckets extends Model<InferAttributes<Buckets>, InferCreationAttributes<Bu
   declare bucketIds: CreationOptional<number[]>;
 
   override toJSON() {
-    const result = JSON.parse(JSON.stringify(this.get({ plain: true })));
+    const result = mergeDeep(this.get({ plain: true }));
 
     return result as InferAttributes<Buckets>;
   }

@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import Connections from '../models/data/connections-model';
 
 export async function init() {
@@ -20,16 +21,7 @@ export async function create({
   secretAccessKey: string;
   region: string;
   bucket: string;
-}): Promise<
-  | {
-      id: number;
-      accessKeyId: string;
-      secretAccessKey: string;
-      region: string;
-      bucket: string;
-    }
-  | undefined
-> {
+}): Promise<ReturnType<Connections['toJSON']> | undefined> {
   try {
     console.log('creating connection');
     const result = await Connections.create({
@@ -67,7 +59,7 @@ export async function upsert({
   secretAccessKey: string;
   region: string;
   bucket: string;
-}) {
+}): Promise<ReturnType<Connections['toJSON']> | undefined> {
   try {
     await Connections.upsert({
       id,
@@ -83,20 +75,56 @@ export async function upsert({
     return result.toJSON();
   } catch (error) {
     console.error(error);
-    return {};
+    return undefined;
   }
 }
 
-export async function get(id?: number): Promise<Connections> {
+export async function get(id: number): Promise<ReturnType<Connections['toJSON']> | undefined> {
   try {
     const settings = await Connections.findOne({ where: { id } });
 
     if (!settings) {
       throw new Error('failed to get bucket');
     }
-    return settings;
+    return settings.toJSON();
+  } catch (error) {
+    console.error(error);
+    return undefined;
+  }
+}
+
+export async function getRecent(
+  fromDate: Date,
+  limit: number,
+): Promise<ReturnType<Connections['toJSON']>[]> {
+  try {
+    const results = await Connections.findAll({
+      where: {
+        createdAt: {
+          [Op.lt]: fromDate, // greater than or equal to given date
+        },
+      },
+      order: [['createdAt', 'DESC']], // newest first
+      limit,
+    });
+
+    return results.map((result) => result.toJSON());
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
+  }
+}
+
+export async function getAll(): Promise<ReturnType<Connections['toJSON']>[] | undefined> {
+  try {
+    const connections = await Connections.findAll();
+
+    if (!connections) {
+      throw new Error('failed to get connections');
+    }
+    return connections.map((connection) => connection.toJSON());
+  } catch (error) {
+    console.error(error);
+    return undefined;
   }
 }

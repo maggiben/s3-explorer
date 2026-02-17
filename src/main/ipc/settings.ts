@@ -1,5 +1,6 @@
 import Settings from '../models/data/settings-model';
 import { MAIN_SETTINGS_ID } from '../../shared/constants/settings';
+import type { ThemeConfig } from 'antd';
 
 export async function init() {
   try {
@@ -12,82 +13,67 @@ export async function init() {
 }
 
 export async function create({
-  id,
-  accessKeyId,
-  secretAccessKey,
-  region,
-  bucket,
+  apparence,
+  username,
 }: {
-  id?: number;
-  accessKeyId: string;
-  secretAccessKey: string;
-  region: string;
-  bucket: string;
-}) {
+  apparence: {
+    mode: 'light' | 'dark' | 'system';
+    theme?: ThemeConfig;
+  };
+  username: string;
+}): Promise<ReturnType<Settings['toJSON']> | undefined> {
   try {
     const settings = await Settings.create({
-      id: id ?? MAIN_SETTINGS_ID,
-      accessKeyId,
-      secretAccessKey,
-      region,
-      bucket,
+      id: MAIN_SETTINGS_ID,
+      apparence,
+      username,
     });
     if (!settings) {
-      throw new Error('failed to get settings');
-    }
-  } catch (error) {
-    console.error(error);
-  }
-}
-/**
- * @param {string} accessKeyId
- * @param {string} secretAccessKey
- * @param {string} region
- * @param {string} bucket
- * @returns {Promise<Settings>}
- */
-export async function upsert({
-  id,
-  accessKeyId,
-  secretAccessKey,
-  region,
-  bucket,
-}: {
-  id?: number;
-  accessKeyId: string;
-  secretAccessKey: string;
-  region: string;
-  bucket: string;
-}) {
-  try {
-    await Settings.upsert({
-      id: id ?? MAIN_SETTINGS_ID,
-      accessKeyId,
-      secretAccessKey,
-      region,
-      bucket,
-    });
-    const settings = await Settings.findOne({ where: { id: MAIN_SETTINGS_ID } });
-    if (!settings) {
-      throw new Error('failed to get settings');
+      throw new Error('failed to create settings');
     }
     return settings.toJSON();
   } catch (error) {
     console.error(error);
-    return {};
+    return undefined;
   }
 }
 
-export async function get(id?: number): Promise<Settings> {
+export async function upsert({
+  apparence,
+}: {
+  id?: number;
+  apparence: {
+    mode: string;
+    theme?: ThemeConfig;
+  };
+}): Promise<ReturnType<Settings['toJSON']> | undefined> {
+  try {
+    await Settings.upsert({
+      id: MAIN_SETTINGS_ID,
+      apparence,
+    });
+    const settings = await Settings.findOne({ where: { id: MAIN_SETTINGS_ID } });
+    if (!settings) {
+      throw new Error('failed to upsert settings');
+    }
+    console.log('setting', settings.toJSON());
+    return settings.toJSON();
+  } catch (error) {
+    console.error(error);
+    return undefined;
+  }
+}
+
+export async function get(id?: number): Promise<ReturnType<Settings['toJSON']> | undefined> {
   try {
     const settings = await Settings.findOne({ where: { id: id ?? MAIN_SETTINGS_ID } });
 
     if (!settings) {
       throw new Error('failed to get settings');
     }
-    return settings;
+    return settings.toJSON();
   } catch (error) {
     console.error(error);
-    return Promise.reject(error);
+    return undefined;
   }
 }

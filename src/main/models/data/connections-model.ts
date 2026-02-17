@@ -20,6 +20,8 @@ class Connections extends Model<
   declare secretAccessKey: CreationOptional<string>;
   declare region: CreationOptional<string>;
   declare bucket: CreationOptional<string>;
+  declare createdAt: CreationOptional<Date>;
+  declare updatedAt: CreationOptional<Date>;
 
   override toJSON() {
     const result = mergeDeep(this.get({ plain: true })) as Record<string, unknown>;
@@ -79,6 +81,14 @@ Connections.init(
       type: DataTypes.STRING,
       allowNull: true,
       defaultValue: '',
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
     },
   },
   {

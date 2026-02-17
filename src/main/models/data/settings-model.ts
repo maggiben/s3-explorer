@@ -6,24 +6,21 @@ import {
   CreationOptional,
 } from 'sequelize';
 import { connect } from '../../common/database';
-import { encrypt, decrypt } from '../../common/crypto';
 import { mergeDeep } from '../../../shared/lib/utils';
+import type { ThemeConfig } from 'antd';
 
 const sequelize = connect();
 
 class Settings extends Model<InferAttributes<Settings>, InferCreationAttributes<Settings>> {
   declare id: CreationOptional<number>;
-  declare accessKeyId: CreationOptional<string>;
-  declare secretAccessKey: CreationOptional<string>;
-  declare region: CreationOptional<string>;
-  declare bucket: CreationOptional<string>;
+  declare apparence: CreationOptional<{
+    mode: string;
+    theme?: ThemeConfig;
+  }>;
+  declare username: CreationOptional<string | null>;
 
   override toJSON() {
-    const result = mergeDeep(this.get({ plain: false })) as Record<string, unknown>;
-
-    delete result.secretAccessKey;
-
-    return result as InferAttributes<Settings>;
+    return mergeDeep(this.get({ plain: false })) as InferAttributes<Settings>;
   }
 }
 
@@ -34,42 +31,14 @@ Settings.init(
       allowNull: false,
       primaryKey: true,
     },
-    accessKeyId: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-
-    secretAccessKey: {
-      type: DataTypes.STRING,
-      allowNull: true,
-
-      get(this: Settings): string | null {
-        const value = this.getDataValue('secretAccessKey');
-        if (!value) {
-          return null;
-        }
-        return decrypt(Buffer.from(value, 'base64')).toString();
-      },
-
-      set(this: Settings, value: string | null): void {
-        if (!value) {
-          this.setDataValue('secretAccessKey', '');
-          return;
-        }
-
-        this.setDataValue(
-          'secretAccessKey',
-          encrypt(Buffer.from(value, 'utf8')).toString('base64'),
-        );
+    apparence: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: {
+        mode: 'light',
       },
     },
-
-    region: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-
-    bucket: {
+    username: {
       type: DataTypes.STRING,
       allowNull: true,
     },

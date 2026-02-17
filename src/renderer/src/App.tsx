@@ -3,11 +3,10 @@
 import Layout from './Layout';
 import Providers from './Providers';
 import NewBucket from './components/NewBucket';
-import Welcome from './components/Welcome';
 
-function App(): React.JSX.Element {
+function App({ settings }: { settings: Record<string, unknown> }): React.JSX.Element {
   return (
-    <Providers>
+    <Providers settings={settings}>
       <Layout>
         <NewBucket />
       </Layout>

@@ -1,6 +1,7 @@
-import { contextBridge } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
 import { electronAPI } from '@electron-toolkit/preload';
-
+import { init, get, create } from '../main/ipc/settings';
+import ipc from '../shared/constants/ipc';
 // Custom APIs for renderer
 const api = {};
 
@@ -11,6 +12,10 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI);
     contextBridge.exposeInMainWorld('api', api);
+    contextBridge.exposeInMainWorld('settings', {
+      get: () => ipcRenderer.invoke(ipc.MAIN_API, { command: 'settings:get' }),
+      set: () => ipcRenderer.invoke(ipc.MAIN_API, { command: 'settings:set' }),
+    });
   } catch (error) {
     console.error(error);
   }

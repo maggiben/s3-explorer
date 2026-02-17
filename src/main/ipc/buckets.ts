@@ -24,7 +24,7 @@ export async function create({
   color: string;
   icon: string;
   bucketIds: number[];
-}) {
+}): Promise<ReturnType<Buckets['toJSON']> | undefined> {
   try {
     const buckets = await Buckets.create({
       type,
@@ -39,6 +39,7 @@ export async function create({
     return buckets.toJSON();
   } catch (error) {
     console.error(error);
+    return undefined;
   }
 }
 
@@ -88,5 +89,19 @@ export async function get(id?: number): Promise<Buckets> {
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
+  }
+}
+
+export async function getAll(): Promise<ReturnType<Buckets['toJSON']>[] | undefined> {
+  try {
+    const buckets = await Buckets.findAll();
+
+    if (!buckets) {
+      throw new Error('failed to get buckets');
+    }
+    return buckets.map((bucket) => bucket.toJSON());
+  } catch (error) {
+    console.error(error);
+    return undefined;
   }
 }
