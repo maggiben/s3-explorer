@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Flex, Pagination, Space, Switch, Table } from 'antd';
 import { FolderOutlined, FileOutlined } from '@ant-design/icons';
 import type { TableColumnsType, TableProps } from 'antd';
-import ipc from '../../../../shared/constants/ipc';
 import { useParams } from 'react-router';
 import { toHumanSize } from '../../../../shared/lib/utils';
 import { FOLDER, FILE } from '../../../../shared/constants/object-type';
@@ -187,7 +186,7 @@ export default function Browser() {
       .connect(parseInt(params.id, 10))
       .then((result) => {
         console.log('result', result);
-        setData(result[0]);
+        setData(result);
       })
       .catch((error) => {
         console.error(error);

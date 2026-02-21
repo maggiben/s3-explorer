@@ -53,6 +53,7 @@ export async function syncObjectsFromS3(connectionId: number) {
       lastModified: LastModified ?? new Date(0), // default date if missing
       size: Size ?? 0, // default size if missing
       storageClass: StorageClass ?? 'STANDARD', // default storage class if missing
+      connectionId,
     });
 
     const results = await Promise.all([
@@ -85,31 +86,23 @@ export async function syncObjectsFromS3(connectionId: number) {
         }),
       result.NextContinuationToken ? scanObjects(result.NextContinuationToken) : null,
     ]);
-
-    console.log('results', results);
     return results;
   };
 
   try {
     const tree = await scanObjects();
-    const result = await Objects.bulkCreate(tree[0], {
+    const results = await Objects.bulkCreate(tree[0], {
       updateOnDuplicate: ['type', 'lastModified', 'size', 'updatedAt', 'storageClass'],
     });
     // Remove missing objects.
     await Objects.destroy({
-      where: { updatedAt: { [Op.lt]: start } },
+      where: { updatedAt: { [Op.lt]: start }, connectionId },
     });
-    console.log('result', result);
-    console.log('tree', tree);
-    return tree;
+    return results.map((result) => result.toJSON());
   } catch (error) {
     console.error(error);
     throw error;
   }
-  // // Remove missing objects.
-  // await ObjectModel.destroy({
-  //   where: { updatedAt: { [Op.lt]: start } },
-  // });
 }
 
 /**

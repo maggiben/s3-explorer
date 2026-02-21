@@ -36,15 +36,13 @@ Objects.init(
   {
     id: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: false,
       primaryKey: true,
-      set: function (this: Objects) {
-        this.setDataValue('id', randomUUID());
-      },
+      defaultValue: DataTypes.UUIDV4,
     },
     connectionId: {
       type: DataTypes.NUMBER,
-      allowNull: false,
+      allowNull: true,
     },
     type: {
       type: DataTypes.TINYINT,
