@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import mimeTypes from 'mime-types';
-import { Op, UniqueConstraintError } from 'sequelize';
+import { Op } from 'sequelize';
 // const { NotFoundError, ConflictError } = require('../../../shared/errors');
 import * as OBJECT_TYPE from '../../shared/constants/object-type';
 import * as STORAGE_CLASS from '../../shared/constants/storage-class';
@@ -23,13 +23,25 @@ export async function init() {
 
 export async function getObjects(
   {
+    connectionId,
     dirname,
     keyword,
     after,
     limit,
-  }: { dirname: string; keyword?: string; after?: number; limit: number } = {
+  }: {
+    connectionId: number;
+    dirname: string;
+    keyword?: string;
+    after?: number;
+    limit: number;
+  } = {
+    connectionId: 0,
     dirname: '',
     limit: 50,
+  } as {
+    connectionId: number;
+    dirname: string;
+    limit: number;
   },
 ) {
   const keywordConditions = keyword
@@ -70,6 +82,7 @@ export async function getObjects(
 
   const objects = await Objects.findAll({
     where: {
+      connectionId,
       dirname: keywordConditions.length
         ? { [Op.like]: generateLikeSyntax(dirname, { start: '' }) }
         : dirname,
@@ -171,12 +184,14 @@ export async function createFile({
   localPath = '/',
   dirname,
   onProgressChannel,
+  onEndChannel,
   connectionId,
 }: {
   $event: IpcMainInvokeEvent;
   localPath?: string;
   dirname?: string;
   onProgressChannel?: string;
+  onEndChannel?: string;
   connectionId: number;
 }) {
   const basename = path.basename(localPath);
@@ -184,12 +199,13 @@ export async function createFile({
     type: OBJECT_TYPE.FILE,
     path: dirname || null ? `${dirname}/${basename}` : `${basename}`,
     storageClass: STORAGE_CLASS.STANDARD,
+    connectionId,
   });
+
   const onProgress = onProgressChannel
-    ? (progress) => {
-        $event.sender.send(onProgressChannel, progress);
-      }
+    ? (progress) => $event.sender.send(onProgressChannel, progress)
     : null;
+  const onEnd = onEndChannel ? () => $event.sender.send(onEndChannel, object.toJSON()) : null;
 
   if (object.dirname) {
     const parent = await Objects.findOne({
@@ -206,7 +222,23 @@ export async function createFile({
 
   try {
     await object.save();
-    await s3.upload(
+    // await s3.upload(
+    //   {
+    //     path: object.path,
+    //     content: fs.createReadStream(localPath),
+    //     options: {
+    //       ContentType: mimeTypes.lookup(basename),
+    //     },
+    //     onProgress,
+    //   },
+    //   connectionId,
+    // );
+    // const objectHeaders = await s3.headObject(object.path, connectionId);
+
+    // object.size = objectHeaders?.ContentLength ?? 0;
+    // object.lastModified = objectHeaders?.LastModified ?? new Date();
+    // await object.save();
+    s3.upload(
       {
         path: object.path,
         content: fs.createReadStream(localPath),
@@ -216,12 +248,14 @@ export async function createFile({
         onProgress,
       },
       connectionId,
-    );
-    const objectHeaders = await s3.headObject(object.path, connectionId);
-
-    object.size = objectHeaders?.ContentLength ?? 0;
-    object.lastModified = objectHeaders?.LastModified ?? new Date();
-    await object.save();
+    )
+      .then(async () => {
+        const objectHeaders = await s3.headObject(object.path, connectionId);
+        object.size = objectHeaders?.ContentLength ?? 0;
+        object.lastModified = objectHeaders?.LastModified ?? new Date();
+        await object.save();
+      })
+      .finally(onEnd);
     return object.toJSON();
   } catch (error) {
     await object.destroy();
@@ -412,4 +446,84 @@ export async function deleteObjects({
   }
 
   return null;
+}
+
+/**
+ * Copy or move objects (files and folders) to a target folder.
+ * @param sourceIds - Object ids (from Objects table)
+ * @param targetDirname - Destination folder path (e.g. "foo/bar" or "" for root)
+ * @param connectionId
+ * @param move - If true, delete source objects after copy
+ */
+export async function copyObjects({
+  sourceIds,
+  targetDirname,
+  connectionId,
+  move = false,
+}: {
+  sourceIds: string[];
+  targetDirname: string;
+  connectionId: number;
+  move?: boolean;
+}) {
+  if (sourceIds.length === 0) return [];
+
+  const targetPrefix = targetDirname ? `${targetDirname.replace(/\/$/, '')}/` : '';
+
+  const objects = await Objects.findAll({
+    where: { id: { [Op.in]: sourceIds }, connectionId },
+  });
+
+  if (objects.length !== sourceIds.length) {
+    throw new Error(`One or more objects not found: ${sourceIds.join(', ')}`);
+  }
+
+  const toCopy: { source: (typeof objects)[0]; newPath: string }[] = [];
+
+  for (const obj of objects) {
+    if (obj.type === OBJECT_TYPE.FILE) {
+      const newPath = targetPrefix ? `${targetPrefix}${obj.basename}` : obj.basename;
+      toCopy.push({ source: obj, newPath });
+    } else {
+      const folderPath = obj.path;
+      const descendants = await Objects.findAll({
+        where: { path: { [Op.startsWith]: folderPath } },
+        order: [['path', 'ASC']],
+      });
+      for (const d of descendants) {
+        const suffix = d.path.startsWith(folderPath) ? d.path.slice(folderPath.length) : d.basename;
+        const newPath = targetPrefix ? `${targetPrefix}${suffix}` : suffix;
+        toCopy.push({ source: d, newPath });
+      }
+    }
+  }
+
+  const created: Objects[] = [];
+
+  await serial(
+    toCopy.map(({ source, newPath }) => async () => {
+      await s3.copyObject(source.path, newPath, connectionId);
+      const attrs = {
+        type: source.type,
+        path: newPath,
+        storageClass: source.storageClass,
+        connectionId,
+      };
+      const headers = await s3.headObject(newPath, connectionId);
+      const record = await Objects.create({
+        ...attrs,
+        size: headers?.ContentLength ?? 0,
+        lastModified: headers?.LastModified ?? new Date(),
+        connectionId,
+      });
+      created.push(record);
+    }),
+  );
+
+  if (move) {
+    const idsToDelete = [...new Set(toCopy.map(({ source }) => source.id))];
+    await deleteObjects({ ids: idsToDelete, connectionId });
+  }
+
+  return created.map((r) => r.toJSON());
 }

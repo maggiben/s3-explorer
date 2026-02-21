@@ -13,11 +13,23 @@ import { IConnection } from 'types/IConnection';
 type TBucketCommands = 'buckets:add' | 'buckets:getAll';
 type TConnectionCommands = 'connections:add' | 'connections:getAll';
 type TSettingsCommands = 'settings:add' | 'settings:getAll';
+type TObjectCommands = 'objects:getObjects' | 'objects:createFile' | 'objects:copyObjects';
 interface IMessage {
-  command: TBucketCommands | TSettingsCommands | TConnectionCommands;
+  command: TBucketCommands | TSettingsCommands | TConnectionCommands | TObjectCommands;
   connection?: IConnection;
   settings?: ReturnType<SettingsModel['toJSON']>;
   id?: number;
+  connectionId?: number;
+  dirname?: string;
+  localPath?: string;
+  onProgressChannel?: string;
+  onEndChannel?: string;
+  sourceIds?: string[];
+  targetDirname?: string;
+  move?: boolean;
+  keyword?: string;
+  after?: number;
+  limit?: number;
 }
 (async (ts: number) => {
   try {
@@ -94,6 +106,7 @@ interface IMessage {
                     };
                   }
                   case 'connect': {
+                    if (arg.id == null) break;
                     return syncObjectsFromS3(arg.id);
                   }
                   case 'deleteForgettableConnections': {
@@ -170,6 +183,66 @@ interface IMessage {
                   }
                   default:
                     console.log('bad action');
+                    break;
+                }
+                break;
+              }
+              case 'objects': {
+                switch (action) {
+                  case 'getObjects': {
+                    try {
+                      if (arg.connectionId == null) break;
+                      const result = await Objects.getObjects({
+                        connectionId: arg.connectionId,
+                        dirname: arg.dirname ?? '',
+                        keyword: arg.keyword,
+                        after: arg.after,
+                        limit: arg.limit ?? 50,
+                      });
+                      return { result, ack: new Date().getTime() };
+                    } catch (err) {
+                      console.error(err);
+                      break;
+                    }
+                  }
+                  case 'createFile': {
+                    try {
+                      if (arg.connectionId == null || arg.localPath == null) break;
+                      const result = await Objects.createFile({
+                        $event: event,
+                        localPath: arg.localPath,
+                        dirname: arg.dirname,
+                        onProgressChannel: arg.onProgressChannel,
+                        onEndChannel: arg.onEndChannel,
+                        connectionId: arg.connectionId,
+                      });
+                      return { result, ack: new Date().getTime() };
+                    } catch (err) {
+                      console.error(err);
+                      break;
+                    }
+                  }
+                  case 'copyObjects': {
+                    try {
+                      if (
+                        arg.connectionId == null ||
+                        !arg.sourceIds?.length ||
+                        arg.targetDirname === undefined
+                      )
+                        break;
+                      const result = await Objects.copyObjects({
+                        sourceIds: arg.sourceIds,
+                        targetDirname: arg.targetDirname,
+                        connectionId: arg.connectionId,
+                        move: arg.move,
+                      });
+                      return { result, ack: new Date().getTime() };
+                    } catch (err) {
+                      console.error(err);
+                      break;
+                    }
+                  }
+                  default:
                     break;
                 }
                 break;

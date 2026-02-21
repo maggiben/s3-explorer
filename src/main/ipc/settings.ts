@@ -48,6 +48,9 @@ export async function upsert({
   apparence: {
     mode: string;
     theme?: ThemeConfig;
+    sider?: {
+      collapsed?: boolean;
+    };
   };
 }): Promise<ReturnType<Settings['toJSON']> | undefined> {
   try {

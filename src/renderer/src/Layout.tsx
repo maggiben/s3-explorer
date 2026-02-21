@@ -9,33 +9,35 @@ import {
 } from '@ant-design/icons';
 import { Routes, Route, HashRouter, Link } from 'react-router';
 import type { MenuProps } from 'antd';
-import { ConfigProvider, Breadcrumb, Layout, Menu } from 'antd';
+import { ConfigProvider, Breadcrumb, Layout, Menu, theme } from 'antd';
 import type { SiderTheme } from 'antd/es/layout/Sider';
-import { useAtomValue } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { themeAtom } from './atoms/theme';
+import { settingsAtom } from './atoms/settings';
 import useRecent from './hooks/useRecent';
 
 import Connection from './components/Connection/Connection';
 import Browser from './components/Browser/Browser';
 import Welcome from './components/Welcome';
+import { mergeDeep } from '../../shared/lib/utils';
 
 const { Header, Content, Sider } = Layout;
 
-const settings: MenuProps['items'] = [UserOutlined].map((icon, index) => {
-  const key = String(index + 1);
-  return {
-    key: `sub${key}`,
-    icon: React.createElement(icon),
-    label: `subnav ${key}`,
-    children: Array.from({ length: 4 }).map((_, j) => {
-      const subKey = index * 4 + j + 1;
-      return {
-        key: subKey,
-        label: `option${subKey}`,
-      };
-    }),
-  };
-});
+// const settings: MenuProps['items'] = [UserOutlined].map((icon, index) => {
+//   const key = String(index + 1);
+//   return {
+//     key: `sub${key}`,
+//     icon: React.createElement(icon),
+//     label: `subnav ${key}`,
+//     children: Array.from({ length: 4 }).map((_, j) => {
+//       const subKey = index * 4 + j + 1;
+//       return {
+//         key: subKey,
+//         label: `option${subKey}`,
+//       };
+//     }),
+//   };
+// });
 
 function createRecentMenu(connections: { bucket: string; id: number }[]): MenuProps['items'] {
   const menu = [
@@ -64,21 +66,34 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [collapsed, setCollapsed] = React.useState(true);
-  const { mode, theme } = useAtomValue(themeAtom);
+  const [settings, setSettings] = useAtom(settingsAtom);
   const [recent] = useRecent();
-
+  const algorithm = settings.apparence.mode === 'dark' ? [theme.darkAlgorithm] : [];
   return (
     <HashRouter>
-      <ConfigProvider theme={theme}>
+      <ConfigProvider theme={{ ...settings.apparence.theme, algorithm }}>
         <Layout style={{ minHeight: '100vh', minWidth: '100vw' }}>
           <Layout>
             <Sider
               width={200}
-              theme={mode as SiderTheme}
+              theme={settings.apparence.mode as SiderTheme}
               collapsible
-              collapsed={collapsed}
-              onCollapse={(value) => setCollapsed(value)}
+              collapsed={settings.apparence.sider?.collapsed}
+              onCollapse={async (value) => {
+                const newSettings = await window.settings.set(
+                  mergeDeep({
+                    ...settings,
+                    apparence: {
+                      ...settings.apparence,
+                      sider: {
+                        collapsed: value,
+                      },
+                    },
+                  }),
+                );
+                console.log('newSetting', newSettings);
+                setSettings(newSettings);
+              }}
             >
               <div
                 style={{
@@ -99,13 +114,13 @@ export default function RootLayout({
                       : []
                   }
                 />
-                <Menu
+                {/* <Menu
                   mode="inline"
                   defaultSelectedKeys={['1']}
                   defaultOpenKeys={[]}
                   style={{ height: '100%', borderInlineEnd: 0, alignContent: 'end' }}
                   items={settings}
-                />
+                /> */}
               </div>
             </Sider>
             <Layout style={{ padding: '0 24px 24px' }}>

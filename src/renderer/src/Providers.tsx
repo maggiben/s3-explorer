@@ -16,9 +16,8 @@ export default function Providers({
   settings,
 }: Readonly<{
   children: React.ReactNode;
-  settings: ISettings;
+  settings?: ISettings;
 }>) {
-  const algorithm = settings.apparence.mode === 'dark' ? [theme.darkAlgorithm] : null;
   return (
     <JotaiProvider>
       {/* <I18nextProvider i18n={i18n}> */}
@@ -28,10 +27,6 @@ export default function Providers({
             settingsAtom,
             {
               ...settings,
-              apparence: {
-                ...settings.apparence,
-                theme: { ...settings.apparence.theme, algorithm },
-              },
             },
           ],
         ]}

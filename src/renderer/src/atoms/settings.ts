@@ -5,6 +5,9 @@ const initialValue = {
   apparence: {
     mode: 'dark',
     language: 'en',
+    sider: {
+      collapsed: false,
+    },
   },
 } as ISettings;
 

@@ -1,5 +1,5 @@
-
 import {
+  CopyObjectCommand,
   DeleteObjectsCommand,
   GetObjectCommand,
   HeadObjectCommand,
@@ -92,7 +92,15 @@ export async function syncObjectsFromS3(connectionId: number) {
   try {
     const tree = await scanObjects();
     const results = await Objects.bulkCreate(tree[0], {
-      updateOnDuplicate: ['type', 'lastModified', 'size', 'updatedAt', 'storageClass'],
+      updateOnDuplicate: [
+        'id',
+        'type',
+        'lastModified',
+        'size',
+        'updatedAt',
+        'storageClass',
+        'connectionId',
+      ],
     });
     // Remove missing objects.
     await Objects.destroy({
@@ -234,6 +242,33 @@ export async function upload({ path, content, options, onProgress }, connectionI
   }
 
   return upload.done();
+}
+
+/**
+ * Copy an object within the same bucket.
+ * @param {string} sourceKey - Source object key
+ * @param {string} destKey - Destination object key
+ * @param {number} connectionId
+ * @returns {Promise<CopyObjectCommandOutput>}
+ */
+export async function copyObject(sourceKey: string, destKey: string, connectionId: number) {
+  const connection = await get(connectionId, false);
+  if (!connection) return;
+  const client = new S3Client({
+    region: connection.region,
+    credentials: {
+      accessKeyId: connection.accessKeyId,
+      secretAccessKey: connection.secretAccessKey,
+    },
+  });
+  const copySource = `${connection.bucket}/${encodeURIComponent(sourceKey)}`;
+  return client.send(
+    new CopyObjectCommand({
+      Bucket: connection.bucket,
+      CopySource: copySource,
+      Key: destKey,
+    }),
+  );
 }
 
 /**
