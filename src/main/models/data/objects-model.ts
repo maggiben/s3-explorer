@@ -130,8 +130,12 @@ Objects.init(
     modelName: 'objects',
     indexes: [
       {
-        unique: true,
+        unique: false,
         fields: ['path'],
+      },
+      {
+        unique: false,
+        fields: ['connectionId'],
       },
       {
         unique: false,

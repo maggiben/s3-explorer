@@ -146,6 +146,7 @@ export async function createFolder({
 }) {
   const object = new Objects({
     type: OBJECT_TYPE.FOLDER,
+    connectionId,
     path: dirname || null ? `${dirname}/${basename}/` : `${basename}/`,
   });
 

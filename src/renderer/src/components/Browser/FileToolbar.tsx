@@ -1,4 +1,4 @@
-import { Flex, Space, Button, Divider } from 'antd';
+import { Flex, Space, Button, Divider, Input } from 'antd';
 import { SearchOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 
 interface DataType {
@@ -38,7 +38,7 @@ export default function FileToolbar({
     if (!connectionId) return;
     try {
       await window.objects.createFolder({
-        basename: 'music/jazz',
+        basename: 'music/classical',
         // basename: 'music/jazz',
         // basename: 'music',
         connectionId,
@@ -49,21 +49,20 @@ export default function FileToolbar({
     }
   };
 
+  const handleSearch = () => {
+    console.log('search');
+  };
+
   return (
     <Flex wrap gap="small" align="center">
       <Space.Compact>
+      <Button icon={<PlusOutlined />} onClick={handleCreateFolder}></Button>
         <Button icon={<DeleteOutlined />} shape="square" danger onClick={handleDelete}></Button>
       </Space.Compact>
       <Divider vertical />
       <Space.Compact>
-        <Button icon={<PlusOutlined />} onClick={handleCreateFolder}></Button>
-        <Button icon={<SearchOutlined />}></Button>
-      </Space.Compact>
-      <Divider vertical />
-      <Space.Compact>
-        <Button icon={<SearchOutlined />} shape="square"></Button>
-        <Button icon={<SearchOutlined />}></Button>
-        <Button icon={<SearchOutlined />}></Button>
+        <Input defaultValue="" />
+        <Button icon={<SearchOutlined />} onClick={handleSearch}></Button>
       </Space.Compact>
     </Flex>
   );

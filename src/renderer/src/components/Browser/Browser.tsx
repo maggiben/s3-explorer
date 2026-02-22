@@ -70,71 +70,6 @@ const columns: TableColumnsType<DataType> = [
   },
 ];
 
-// const data: DataType[] = [
-//   {
-//     key: 1,
-//     name: 'John Brown sr.',
-//     age: 60,
-//     address: 'New York No. 1 Lake Park',
-//     children: [
-//       {
-//         key: 11,
-//         name: 'John Brown',
-//         age: 42,
-//         address: 'New York No. 2 Lake Park',
-//       },
-//       {
-//         key: 12,
-//         name: 'John Brown jr.',
-//         age: 30,
-//         address: 'New York No. 3 Lake Park',
-//         children: [
-//           {
-//             key: 121,
-//             name: 'Jimmy Brown',
-//             age: 16,
-//             address: 'New York No. 3 Lake Park',
-//           },
-//         ],
-//       },
-//       {
-//         key: 13,
-//         name: 'Jim Green sr.',
-//         age: 72,
-//         address: 'London No. 1 Lake Park',
-//         children: [
-//           {
-//             key: 131,
-//             name: 'Jim Green',
-//             age: 42,
-//             address: 'London No. 2 Lake Park',
-//             children: [
-//               {
-//                 key: 1311,
-//                 name: 'Jim Green jr.',
-//                 age: 25,
-//                 address: 'London No. 3 Lake Park',
-//               },
-//               {
-//                 key: 1312,
-//                 name: 'Jimmy Green sr.',
-//                 age: 18,
-//                 address: 'London No. 4 Lake Park',
-//               },
-//             ],
-//           },
-//         ],
-//       },
-//     ],
-//   },
-//   {
-//     key: 2,
-//     name: 'Joe Black',
-//     age: 32,
-//     address: 'Sydney No. 1 Lake Park',
-//   },
-// ];
-
 // rowSelection objects indicates the need for row selection
 
 async function getLocalPaths(files: File[]): Promise<string[]> {
@@ -360,6 +295,7 @@ export default function Browser() {
   const handleDrop = async (event: React.DragEvent) => {
     event.preventDefault();
     event.stopPropagation();
+    console.log('handleDrop', event, connectionId, params.id);
     if (connectionId == null || !Number.isFinite(connectionId)) return;
 
     // const objectId = event.dataTransfer.getData(S3_OBJECT_ID_KEY);
@@ -422,8 +358,12 @@ export default function Browser() {
   return (
     <Flex
       vertical
-      // onDragOver={handleDragOver}
-      // onDrop={handleDrop}
+      onDragOver={(event) => {
+        !treeData.length && handleDragOver(event);
+      }}
+      onDrop={(event) => {
+        !treeData.length && handleDrop(event);
+      }}
       style={{
         maxHeight: 'calc(100vh - 80px)',
       }}
@@ -460,15 +400,15 @@ export default function Browser() {
             onRow={(record) => {
               return {
                 draggable: true,
-                onMouseDown: () => {
-                  if (record.type !== FILE || connectionId == null) return;
-                  window.api
-                    .getSignedUrlForDrag(connectionId, record.path)
-                    .then((url) => {
-                      if (url) dragUrlRef.current = { path: record.path, url };
-                    })
-                    .catch(() => {});
-                },
+                // onMouseDown: () => {
+                //   if (record.type !== FILE || connectionId == null) return;
+                //   window.api
+                //     .getSignedUrlForDrag(connectionId, record.path)
+                //     .then((url) => {
+                //       if (url) dragUrlRef.current = { path: record.path, url };
+                //     })
+                //     .catch(() => {});
+                // },
                 onDragStart: (event: React.DragEvent) => {
                   if (record.type !== FILE || connectionId == null) return;
                   const name = basename(record.path) || 'download';
