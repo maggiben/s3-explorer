@@ -250,6 +250,7 @@ const DOWNLOAD_URL_MIME = 'application/octet-stream';
 
 export default function Browser() {
   const params = useParams();
+  const [loading, setLoading] = useState(false);
   const [data, setData] = useState<Omit<DataType, 'children'>[]>([]);
   const [selected, setSelected] = useState<DataType[]>([]);
   const [api, contextHolder] = notification.useNotification();
@@ -258,6 +259,7 @@ export default function Browser() {
 
   const refreshList = (connectionId?: number): Promise<void> => {
     if (!connectionId || !Number.isFinite(connectionId)) return Promise.resolve(void 0);
+    setLoading(true);
     return window.connections
       .connect(connectionId)
       .then((result) => {
@@ -265,7 +267,8 @@ export default function Browser() {
         return result;
       })
       .then((result) => setData(Array.isArray(result) ? result : []))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
   };
 
   const treeData = useMemo(() => transformPlainS3PathToTreeTableData(data), [data]);
@@ -394,6 +397,7 @@ export default function Browser() {
             dataSource={treeData}
             pagination={false}
             sticky
+            loading={loading}
             style={{
               height: 'calc(100vh + 200px)',
             }}

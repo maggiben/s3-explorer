@@ -91,17 +91,19 @@ export async function syncObjectsFromS3(connectionId: number) {
 
   try {
     const tree = await scanObjects();
-    const results = await Objects.bulkCreate(tree[0], {
-      updateOnDuplicate: [
-        'id',
-        'type',
-        'lastModified',
-        'size',
-        'updatedAt',
-        'storageClass',
-        'connectionId',
-      ],
-    });
+    const results = tree?.[0]?.length
+      ? await Objects.bulkCreate(tree[0], {
+          updateOnDuplicate: [
+            'id',
+            'type',
+            'lastModified',
+            'size',
+            'updatedAt',
+            'storageClass',
+            'connectionId',
+          ],
+        })
+      : [];
     // Remove missing objects.
     await Objects.destroy({
       where: { updatedAt: { [Op.lt]: start }, connectionId },
