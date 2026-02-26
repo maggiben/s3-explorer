@@ -12,15 +12,18 @@ type ElectronFixtures = {
  * Requires: pnpm run build (so that out/main/index.js exists).
  */
 export const test = base.extend<ElectronFixtures>({
-  electronApp: async ({}, use) => {
+  electronApp: async (_fixtures, runWith) => {
     const mainPath = path.join(process.cwd(), 'out', 'main', 'index.js');
-    const args = process.env.CI ? ['--no-sandbox', mainPath] : [mainPath];
+    const isCI = !!process.env.CI;
+    const args = isCI ? ['--no-sandbox', '--disable-setuid-sandbox', mainPath] : [mainPath];
+    const env = isCI ? { ...process.env, CHROME_DEVEL_SANDBOX: '' } : undefined;
     const electronApp = await electron.launch({
       args,
       cwd: process.cwd(),
       timeout: 30_000,
+      ...(env && { env }),
     });
-    await use(electronApp);
+    await runWith(electronApp);
     await electronApp.close();
   },
 });
