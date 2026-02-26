@@ -12,7 +12,8 @@ type ElectronFixtures = {
  * Requires: pnpm run build (so that out/main/index.js exists).
  */
 export const test = base.extend<ElectronFixtures>({
-  electronApp: async (_fixtures, runWith) => {
+  // eslint-disable-next-line no-empty-pattern -- Playwright requires object destructuring; this fixture uses no other fixtures
+  electronApp: async ({}, runWith) => {
     const mainPath = path.join(process.cwd(), 'out', 'main', 'index.js');
     const isCI = !!process.env.CI;
     const args = isCI ? ['--no-sandbox', '--disable-setuid-sandbox', mainPath] : [mainPath];
