@@ -17,9 +17,6 @@ jobs:
           - os: ubuntu-latest
             platform: linux
             arch: x64
-          - os: ubuntu-24.04-arm
-            platform: linux
-            arch: arm64
           - os: macos-latest
             platform: mac
             arch: x64
@@ -40,12 +37,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-  
-      - name: Install dependencies (targeted)
-        if: matrix.platform == 'linux' && matrix.arch == 'arm64'
-        run: |
-          rm -fr node_modules
-          npm ci --platform=${{ matrix.platform }} --arch=${{ matrix.arch }}
 
       - name: Install Linux dependencies
         if: matrix.platform == 'linux'
