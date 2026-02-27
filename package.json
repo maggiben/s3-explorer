@@ -22,9 +22,9 @@
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
-    "build:win": "npm run build && electron-builder --win",
-    "build:mac": "electron-vite build && electron-builder --mac",
-    "build:linux": "electron-vite build && electron-builder --linux --x64 --arm64"
+    "build:win": "npm run build && electron-builder --win --publish never",
+    "build:mac": "electron-vite build && electron-builder --mac --publish never",
+    "build:linux": "electron-vite build && electron-builder --linux --x64 --arm64 --publish never"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
@@ -69,10 +69,5 @@
     "vite-plugin-svgr": "^4.5.0",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^3.2.4"
-  },
-  "build": {
-    "mac": {
-      "identity": null
-    }
   }
 }

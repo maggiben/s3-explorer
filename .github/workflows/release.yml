@@ -28,6 +28,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -48,8 +50,6 @@ jobs:
       - name: Build and package
         run: |
           npm run build:${{ matrix.platform }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload artifacts (Linux)
         if: matrix.platform == 'linux'
@@ -61,7 +61,9 @@ jobs:
             dist/*.deb
             dist/*.tar.gz
             dist/*.AppImage
-            dist/*.snap
+            dist/*.yml
+            dist/*.yaml
+            dist/*.blockmap
 
       - name: Upload artifacts (macOS)
         if: matrix.platform == 'mac'
@@ -71,6 +73,9 @@ jobs:
           path: |
             dist/*.dmg
             dist/*.zip
+            dist/*.yml
+            dist/*.yaml
+            dist/*.blockmap
 
       - name: Upload artifacts (Windows)
         if: matrix.platform == 'win'
@@ -80,6 +85,9 @@ jobs:
           path: |
             dist/*.exe
             dist/*.msi
+            dist/*.yml
+            dist/*.yaml
+            dist/*.blockmap
 
   release:
     needs: build
