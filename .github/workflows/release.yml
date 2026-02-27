@@ -16,8 +16,16 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux
+            arch: x64
+          - os: ubuntu-24.04-arm
+            platform: linux
+            arch: arm64
           - os: macos-latest
             platform: mac
+            arch: x64
+          - os: macos-latest
+            platform: mac
+            arch: arm64
           - os: windows-latest
             platform: win
     runs-on: ${{ matrix.os }}
@@ -43,7 +51,7 @@ jobs:
       - name: Build and package
         run: |
           npm run build
-          npx electron-builder --${{ matrix.platform }}
+          npx electron-builder --${{ matrix.platform }} ${{ matrix.arch && format('--{0}', matrix.arch) || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -51,7 +59,7 @@ jobs:
         if: matrix.platform == 'linux'
         uses: actions/upload-artifact@v4
         with:
-          name: release-linux
+          name: release-linux-${{ matrix.arch }}
           path: |
             dist/*.AppImage
             dist/*.deb
@@ -61,7 +69,7 @@ jobs:
         if: matrix.platform == 'mac'
         uses: actions/upload-artifact@v4
         with:
-          name: release-mac
+          name: release-mac-${{ matrix.arch }}
           path: |
             dist/*.dmg
             dist/*.zip
@@ -94,8 +102,6 @@ jobs:
           draft: false
           generate_release_notes: true
           files: |
-            release-artifacts/release-linux/*
-            release-artifacts/release-mac/*
-            release-artifacts/release-win/*
+            release-artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
