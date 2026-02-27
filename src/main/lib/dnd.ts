@@ -9,7 +9,7 @@ import * as s3 from '../common/s3';
 
 const pipelineAsync = promisify(pipeline);
 
-const iconName = path.join(__dirname, 'iconForDragAndDrop.png');
+const iconName = path.join(os.tmpdir(), 'iconForDragAndDrop.png');
 const iconStream = fs.createWriteStream(iconName);
 https.get('https://img.icons8.com/ios/452/drag-and-drop.png', (response) => {
   response.pipe(iconStream);

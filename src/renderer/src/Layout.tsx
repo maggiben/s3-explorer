@@ -120,12 +120,18 @@ export default function RootLayout({
                 items={[
                   {
                     title: (
-                      <>
+                      <Link
+                        to="/"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                        }}
+                      >
                         <HomeOutlined />
                         <span>Home</span>
-                      </>
+                      </Link>
                     ),
-                    href: '/',
                   },
                 ]}
                 style={{ margin: '16px 0' }}

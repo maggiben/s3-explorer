@@ -4,5 +4,8 @@ out
 .DS_Store
 .eslintcache
 *.log*
+.cursor
+AGENTS.md
 garage/data
 garage/meta
+.env

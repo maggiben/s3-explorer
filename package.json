@@ -18,7 +18,7 @@
     "test:unit:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:all": "pnpm run test:unit && pnpm run test:e2e",
+    "test:all": "npm run test:unit && npm run test:e2e",
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
@@ -37,6 +37,7 @@
     "electron-updater": "^6.3.9",
     "i18next": "^25.8.8",
     "jotai": "^2.17.1",
+    "mime-types": "^3.0.2",
     "react-i18next": "^16.5.4",
     "react-router": "^7.13.0",
     "sequelize": "^6.37.7",
@@ -46,6 +47,7 @@
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
     "@electron-toolkit/eslint-config-ts": "^3.1.0",
     "@electron-toolkit/tsconfig": "^2.0.0",
+    "@playwright/test": "^1.49.0",
     "@types/node": "^22.19.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
@@ -58,20 +60,19 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
+    "jsdom": "^25.0.1",
     "prettier": "^3.7.4",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "typescript": "^5.9.3",
     "vite": "^7.2.6",
     "vite-plugin-svgr": "^4.5.0",
-    "vitest": "^3.2.4",
-    "jsdom": "^25.0.1",
-    "@playwright/test": "^1.49.0"
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^3.2.4"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "electron",
-      "esbuild"
-    ]
+  "build": {
+    "mac": {
+      "identity": null
+    }
   }
 }

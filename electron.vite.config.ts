@@ -1,10 +1,13 @@
 import { resolve } from 'path';
 import { defineConfig } from 'electron-vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 
 export default defineConfig({
-  main: {},
+  main: {
+    plugins: [tsconfigPaths()],
+  },
   preload: {},
   renderer: {
     resolve: {
@@ -12,6 +15,6 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src'),
       },
     },
-    plugins: [react(), svgr({ svgrOptions: { icon: true } })],
+    plugins: [tsconfigPaths(), react(), svgr({ svgrOptions: { icon: true } })],
   },
 });

@@ -9,7 +9,7 @@ type ElectronFixtures = {
 
 /**
  * Fixture that launches the built Electron app for E2E tests.
- * Requires: pnpm run build (so that out/main/index.js exists).
+ * Requires: npm run build (so that out/main/index.js exists).
  */
 export const test = base.extend<ElectronFixtures>({
   // eslint-disable-next-line no-empty-pattern -- Playwright requires object destructuring; this fixture uses no other fixtures

@@ -5,24 +5,24 @@
 ### Install
 
 ```bash
-$ pnpm install
+$ npm install
 ```
 
 ### Development
 
 ```bash
-$ pnpm dev
+$ npm run dev
 ```
 
 ### Build
 
 ```bash
 # For windows
-$ pnpm build:win
+$ npm run build:win
 
 # For macOS
-$ pnpm build:mac
+$ npm run build:mac
 
 # For Linux
-$ pnpm build:linux
+$ npm run build:linux
 ```

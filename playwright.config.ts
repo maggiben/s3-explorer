@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 /**
  * E2E tests for Electron: main + renderer interaction.
- * Run after build: pnpm run build && pnpm run test:e2e
+ * Run after build: npm run build && npm run test:e2e
  */
 export default defineConfig({
   testDir: 'e2e',

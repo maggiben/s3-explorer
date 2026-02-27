@@ -24,17 +24,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Install Linux dependencies
         if: matrix.platform == 'linux'
@@ -45,8 +42,8 @@ jobs:
 
       - name: Build and package
         run: |
-          pnpm run build
-          pnpm exec electron-builder --${{ matrix.platform }}
+          npm run build
+          npx electron-builder --${{ matrix.platform }}
 
       - name: Upload artifacts (Linux)
         if: matrix.platform == 'linux'

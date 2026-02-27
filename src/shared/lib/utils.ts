@@ -1,4 +1,3 @@
-import sanitizeName from 'sanitize-filename';
 const UNITS = ' KMGTPEZYXWVU';
 
 export const timeStringToSeconds = (timeString: string): number => {
@@ -125,28 +124,6 @@ export function fromHumanSize(size: string): number {
 
   return Math.pow(1024, unitIndex) * num;
 }
-
-/**
- * Template a string with variables denoted by {prop}.
- *
- * @param {string} str
- * @param {Array.<Object>} objs
- * @return {string}
- */
-export const tmpl = (
-  str: string,
-  obj: Record<string, unknown>,
-  sep: string = '.',
-  replacement: string = '-',
-): string => {
-  const result = str.replace(/{([^{}]+)}/g, (_match, key) => {
-    const value = key.split(sep).reduce((acc, curr) => {
-      return acc && typeof acc === 'object' ? acc[curr] : undefined;
-    }, obj);
-    return value !== undefined ? String(value) : '';
-  });
-  return sanitizeName(result, { replacement });
-};
 
 /**
  * Convert a number to string and padd n zeroes
