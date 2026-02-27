@@ -50,7 +50,6 @@ jobs:
 
       - name: Build and package
         run: |
-          npm run build
           npm run build:${{ matrix.platform }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
